@@ -19,7 +19,6 @@ function App() {
     rating_latter: string
     year: number
     total_numberof_rating: number
-    metascore?: number
   }) => {
     setLoading(true)
     setError(null)

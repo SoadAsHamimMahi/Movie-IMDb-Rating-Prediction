@@ -7,7 +7,6 @@ interface PredictionFormProps {
     rating_latter: string
     year: number
     total_numberof_rating: number
-    metascore?: number
   }) => void
   loading: boolean
 }
@@ -47,7 +46,6 @@ export default function PredictionForm({ onSubmit, loading }: PredictionFormProp
   const [ratingLatter, setRatingLatter] = useState('')
   const [year, setYear] = useState('')
   const [totalRatings, setTotalRatings] = useState('')
-  const [metascore, setMetascore] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const validate = () => {
@@ -69,9 +67,6 @@ export default function PredictionForm({ onSubmit, loading }: PredictionFormProp
     if (!totalRatings || parseFloat(totalRatings) < 0) {
       newErrors.totalRatings = 'Total ratings must be 0 or greater'
     }
-    if (metascore && (parseFloat(metascore) < 0 || parseFloat(metascore) > 100)) {
-      newErrors.metascore = 'Metascore must be between 0 and 100'
-    }
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -82,27 +77,13 @@ export default function PredictionForm({ onSubmit, loading }: PredictionFormProp
     
     if (!validate()) return
 
-    const submitData: {
-      genre: string
-      runtime: number
-      rating_latter: string
-      year: number
-      total_numberof_rating: number
-      metascore?: number
-    } = {
+    onSubmit({
       genre,
       runtime: parseFloat(runtime),
       rating_latter: ratingLatter,
       year: parseInt(year),
       total_numberof_rating: parseFloat(totalRatings),
-    }
-    
-    // Only include metascore if provided
-    if (metascore && metascore.trim() !== '') {
-      submitData.metascore = parseFloat(metascore)
-    }
-    
-    onSubmit(submitData)
+    })
   }
 
   return (
@@ -208,7 +189,7 @@ export default function PredictionForm({ onSubmit, loading }: PredictionFormProp
         </div>
 
         {/* Total Ratings */}
-        <div>
+        <div className="md:col-span-2">
           <label htmlFor="totalRatings" className="block text-sm font-semibold text-gray-300 mb-2">
             Total Number of Ratings <span className="text-amber-500">*</span>
           </label>
@@ -228,33 +209,6 @@ export default function PredictionForm({ onSubmit, loading }: PredictionFormProp
           {errors.totalRatings && (
             <p className="mt-1 text-sm text-red-400">{errors.totalRatings}</p>
           )}
-        </div>
-
-        {/* Metascore */}
-        <div>
-          <label htmlFor="metascore" className="block text-sm font-semibold text-gray-300 mb-2">
-            Metascore <span className="text-gray-500 text-xs">(optional)</span>
-          </label>
-          <input
-            type="number"
-            id="metascore"
-            value={metascore}
-            onChange={(e) => setMetascore(e.target.value)}
-            min="0"
-            max="100"
-            step="1"
-            className={`w-full px-4 py-3 bg-gray-900 border rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all ${
-              errors.metascore ? 'border-red-500' : 'border-gray-700 hover:border-amber-500/50'
-            }`}
-            placeholder="e.g., 65 (0-100)"
-            disabled={loading}
-          />
-          {errors.metascore && (
-            <p className="mt-1 text-sm text-red-400">{errors.metascore}</p>
-          )}
-          <p className="mt-1 text-xs text-gray-500">
-            Note: Models need to be retrained to use Metascore feature
-          </p>
         </div>
       </div>
 

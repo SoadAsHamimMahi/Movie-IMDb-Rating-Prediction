@@ -4,7 +4,6 @@ export interface PredictionRequest {
   rating_latter: string
   year: number
   total_numberof_rating: number
-  metascore?: number
 }
 
 export interface PredictionResponse {

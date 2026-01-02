@@ -1,7 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, field_validator
-from typing import Optional
 import joblib
 import pandas as pd
 import numpy as np
@@ -123,7 +122,6 @@ class PredictionRequest(BaseModel):
     rating_latter: str = Field(..., description="Rating category (e.g., PG, PG-13, R)")
     year: int = Field(..., ge=1900, le=datetime.now().year + 1, description="Release year")
     total_numberof_rating: float = Field(..., ge=0, description="Total number of ratings")
-    metascore: Optional[float] = Field(None, ge=0, le=100, description="Metascore rating (0-100), optional")
     
     @field_validator('genre', 'rating_latter')
     @classmethod
@@ -163,33 +161,17 @@ async def predict(request: PredictionRequest):
         transformed_rating_count = np.log1p(request.total_numberof_rating)
         
         # Create DataFrame with exact column names expected by the model
-        input_dict = {
+        input_data = pd.DataFrame([{
             "Genre": request.genre,
             "Runtime": request.runtime,
             "Rating_latter": request.rating_latter,
             "Year": request.year,
             "Total_Numberof_Rating": transformed_rating_count
-        }
-        
-        # Add Metascore if provided (models need to be retrained to use this feature)
-        if request.metascore is not None:
-            input_dict["Metascore"] = request.metascore
-        
-        input_data = pd.DataFrame([input_dict])
+        }])
         
         # Get predictions from both models
-        # Note: If Metascore is provided but models weren't trained with it, this will fail
-        # Models need to be retrained with Metascore included in the feature set
-        try:
-            rf_pred = rf_model.predict(input_data)[0]
-            xgb_pred = xgb_model.predict(input_data)[0]
-        except (ValueError, KeyError) as e:
-            if request.metascore is not None:
-                raise HTTPException(
-                    status_code=400, 
-                    detail="Metascore feature is not supported by the current models. Please retrain the models with Metascore included, or omit Metascore from the request."
-                )
-            raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
+        rf_pred = rf_model.predict(input_data)[0]
+        xgb_pred = xgb_model.predict(input_data)[0]
         
         # Extract weights (handling various formats)
         if isinstance(ensemble_weights, dict):

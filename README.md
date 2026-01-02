@@ -44,7 +44,6 @@ This project is a machine learning-powered web application that predicts IMDb mo
 ## ✨ Features
 
 - **Movie Rating Prediction**: Predict IMDb ratings based on genre, runtime, rating category, year, and number of ratings
-- **Metascore Support**: Optional Metascore feature (requires model retraining)
 - **Verdict Classification**: Automatically categorizes predictions as:
   - 🎬 **Flop**: Rating < 5.5
   - 🎯 **Hit**: Rating 5.5 - 6.4
@@ -209,7 +208,6 @@ cd movie-imdb-rating-prediction
    - **Runtime**: Movie runtime in minutes (must be > 0)
    - **Release Year**: Year between 1900 and current year + 1
    - **Total Number of Ratings**: Raw count of ratings (must be ≥ 0)
-   - **Metascore** (optional): Metascore rating 0-100 (requires model retraining)
 
 2. Click **"Predict IMDb Rating"** button
 
@@ -225,8 +223,7 @@ cd movie-imdb-rating-prediction
   "runtime": 114,
   "rating_latter": "PG-13",
   "year": 2025,
-  "total_numberof_rating": 87000,
-  "metascore": 65
+  "total_numberof_rating": 87000
 }
 ```
 
@@ -250,8 +247,7 @@ Predict IMDb rating based on movie features.
   "runtime": 120.0,
   "rating_latter": "PG-13",
   "year": 2021,
-  "total_numberof_rating": 50000.0,
-  "metascore": 65.0  // Optional
+  "total_numberof_rating": 50000.0
 }
 ```
 
@@ -269,7 +265,6 @@ Predict IMDb rating based on movie features.
 - `rating_latter`: Required, non-empty string
 - `year`: Required, between 1900 and current year + 1
 - `total_numberof_rating`: Required, must be ≥ 0
-- `metascore`: Optional, between 0 and 100
 
 #### `GET /health`
 
@@ -333,7 +328,6 @@ final_rating = 0.4 × RF_prediction + 0.6 × XGB_prediction
 - **Rating_latter** (Categorical): One-hot encoded
 - **Year** (Numeric): Standardized
 - **Total_Numberof_Rating** (Numeric): Log-transformed (`log1p`) then standardized
-- **Metascore** (Numeric, Optional): Standardized (requires retraining)
 
 ### Preprocessing
 
@@ -397,15 +391,10 @@ npm run lint
 
 ### Common Issues
 
-**Metascore feature not working:**
-- Current models don't support Metascore
-- Retrain models with Metascore included in feature set
-- See training notebook: `Backend/models/Ridika.ipynb`
-
 **Prediction accuracy:**
 - Model has inherent prediction error (RMSE ~0.6-0.8)
 - Predictions are estimates based on learned patterns
-- Including Metascore can improve accuracy
+- Model learns from training data and generalizes to new predictions
 
 ## 🤝 Contributing
 
